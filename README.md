@@ -122,8 +122,7 @@ Todo con cascada de borrado para mantener integridad.
 ## 📄 Archivos incluidos
 
 - `schema.sql` — Estructura completa de la base de datos  
-- `API-spec.md` — Recomendación de endpoints para el backend  
-- `ERD.png` — Diagrama de entidad-relación  
+
 
 ---
 
