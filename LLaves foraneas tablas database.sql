@@ -1,83 +1,94 @@
 -- ======================================================
--- TABLAS SIN CICLOS
+-- AGREGAR FOREIGN KEYS
 -- ======================================================
 
--- 1. USERS
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    email VARCHAR(150) UNIQUE NOT NULL,
-    password VARCHAR(200) NOT NULL,
-    role VARCHAR(50),
-    created_at TIMESTAMP DEFAULT NOW()
-);
+-- PROJECTS
+ALTER TABLE projects
+ADD CONSTRAINT fk_projects_created_by
+FOREIGN KEY (created_by)
+REFERENCES users(id)
+ON DELETE CASCADE ON UPDATE CASCADE;
 
-CREATE INDEX idx_users_role ON users(role);
+-- FOLDERS
+ALTER TABLE folders
+ADD CONSTRAINT fk_folders_user_id
+FOREIGN KEY (user_id)
+REFERENCES users(id)
+ON DELETE CASCADE ON UPDATE CASCADE;
 
+ALTER TABLE folders
+ADD CONSTRAINT fk_folders_parent
+FOREIGN KEY (parent_folder)
+REFERENCES folders(id)
+ON DELETE SET NULL ON UPDATE CASCADE;
 
--- 2. PROJECTS (sin folder_id todavía)
-CREATE TABLE projects (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(150) NOT NULL,
-    description TEXT,
-    created_by INT NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW()
-);
+-- Ahora sí podemos agregar project_id en folders
+ALTER TABLE folders
+ADD COLUMN project_id INT;
 
-
--- 3. FOLDERS (sin project_id todavía)
-CREATE TABLE folders (
-    id SERIAL PRIMARY KEY,
-    user_id INT NOT NULL,
-    parent_folder INT,
-    name VARCHAR(150) NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW()
-);
-
-
--- 4. TASKS
-CREATE TABLE tasks (
-    id SERIAL PRIMARY KEY,
-    project_id INT NOT NULL,
-    assigned_to INT,
-    title VARCHAR(200) NOT NULL,
-    description TEXT,
-    status VARCHAR(50) DEFAULT 'pending',
-    start_date DATE,
-    end_date DATE,
-    comments TEXT,
-    created_at TIMESTAMP DEFAULT NOW()
-);
+ALTER TABLE folders
+ADD CONSTRAINT fk_folders_project_id
+FOREIGN KEY (project_id)
+REFERENCES projects(id)
+ON DELETE CASCADE ON UPDATE CASCADE;
 
 
--- 5. MEETINGS
-CREATE TABLE meetings (
-    id SERIAL PRIMARY KEY,
-    project_id INT NOT NULL,
-    meeting_date TIMESTAMP NOT NULL,
-    attendees TEXT,
-    notes TEXT,
-    comments TEXT
-);
+-- PROJECTS ahora puede referenciar folders
+ALTER TABLE projects
+ADD COLUMN folder_id INT;
+
+ALTER TABLE projects
+ADD CONSTRAINT fk_projects_folder
+FOREIGN KEY (folder_id)
+REFERENCES folders(id)
+ON DELETE SET NULL ON UPDATE CASCADE;
 
 
--- 6. DOCUMENTS (sin folder FK todavía)
-CREATE TABLE documents (
-    id SERIAL PRIMARY KEY,
-    folder_id INT,
-    uploaded_by INT NOT NULL,
-    title VARCHAR(150),
-    file_path TEXT NOT NULL,
-    file_type VARCHAR(50),
-    uploaded_at TIMESTAMP DEFAULT NOW()
-);
+-- TASKS
+ALTER TABLE tasks
+ADD CONSTRAINT fk_tasks_project
+FOREIGN KEY (project_id)
+REFERENCES projects(id)
+ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE tasks
+ADD CONSTRAINT fk_tasks_assigned
+FOREIGN KEY (assigned_to)
+REFERENCES users(id)
+ON DELETE SET NULL ON UPDATE CASCADE;
 
 
--- 7. LOGS
-CREATE TABLE logs (
-    id SERIAL PRIMARY KEY,
-    user_id INT,
-    project_id INT,
-    action VARCHAR(200) NOT NULL,
-    description TEXT,
-    created_at TIMESTAMP DEFAULT NOW()
-);
+-- MEETINGS
+ALTER TABLE meetings
+ADD CONSTRAINT fk_meetings_project
+FOREIGN KEY (project_id)
+REFERENCES projects(id)
+ON DELETE CASCADE ON UPDATE CASCADE;
+
+
+-- DOCUMENTS
+ALTER TABLE documents
+ADD CONSTRAINT fk_documents_folder
+FOREIGN KEY (folder_id)
+REFERENCES folders(id)
+ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE documents
+ADD CONSTRAINT fk_documents_uploaded
+FOREIGN KEY (uploaded_by)
+REFERENCES users(id)
+ON DELETE CASCADE ON UPDATE CASCADE;
+
+
+-- LOGS
+ALTER TABLE logs
+ADD CONSTRAINT fk_logs_user
+FOREIGN KEY (user_id)
+REFERENCES users(id)
+ON DELETE SET NULL ON UPDATE CASCADE;
+
+ALTER TABLE logs
+ADD CONSTRAINT fk_logs_project
+FOREIGN KEY (project_id)
+REFERENCES projects(id)
+ON DELETE CASCADE ON UPDATE CASCADE;
