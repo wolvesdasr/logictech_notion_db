@@ -1,5 +1,5 @@
 -- ======================================================
--- TABLAS SIN CICLOS
+-- TABLAS 
 -- ======================================================
 
 -- 1. USERS
@@ -80,4 +80,5 @@ CREATE TABLE logs (
     action VARCHAR(200) NOT NULL,
     description TEXT,
     created_at TIMESTAMP DEFAULT NOW()
+
 );
